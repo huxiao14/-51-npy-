@@ -1,0 +1,8 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj",
+".\Objects\oled.obj",
+".\Objects\Timer.obj",
+".\Objects\UI.obj",
+".\Objects\EEPROM.obj" 
+TO ".\Objects\Code" 
+PRINT(".\Listings\Code.m51") RAMSIZE(256) 
