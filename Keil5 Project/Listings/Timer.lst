@@ -1,0 +1,58 @@
+C51 COMPILER V9.54   TIMER                                                                 11/15/2022 16:56:58 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE TIMER
+OBJECT MODULE PLACED IN .\Objects\Timer.obj
+COMPILER INVOKED BY: E:\Embedded System\51\Keil5\C51\BIN\C51.EXE Timer.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRI
+                    -NT(.\Listings\Timer.lst) TABS(2) OBJECT(.\Objects\Timer.obj)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          
+   3          //void Timer_Tran(unsigned int time_us,unsigned char *p_high,unsigned char *p_low) //½«¶¨Ê±Æ÷ËùÐèÊ±¼äÒÔusÐ
+             -ÎÊ½´«Èë£¬²¢½«Ö¸ÕëÖ¸ÏòµÄhigh low¸ÄÎª¿ÉÖ±½ÓÉèÖÃ¶¨Ê±Æ÷µÄÖµ
+   4          //{
+   5          //  unsigned int time = 65535-time_us+1;
+   6          //  unsigned char tmp;
+   7          //  tmp = (unsigned char)(time & 0x00FF);
+   8          //  *p_low = tmp;
+   9          //  tmp = (unsigned char)(time >> 8);
+  10          //  *p_high = tmp;
+  11          //}
+  12          
+  13          void Timer0_Init()    //³õÊ¼»¯¶¨Ê±Æ÷0
+  14          {
+  15   1        TMOD &= 0xF0; // ±£³Ö¶¨Ê±Æ÷1²»±äµÄÇ°ÌáÏÂÇå¿Õ¶¨Ê±Æ÷0µÄÉèÖÃ
+  16   1        TMOD |= 0x01; // ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½Îªxxxx0001£¬¼´¶¨Ê±Æ÷0µÄÄ£Ê½1
+  17   1        TH0 = 0x73;   // ¶¨Ê±Æ÷¸ßÎ»ÉèÖÃ 
+  18   1        TL0 = 0x60;   // ¶¨Ê±Æ÷µÍÎ»ÉèÖÃ
+  19   1        TR0 = 1;    
+  20   1        ET0 = 1;
+  21   1        EA = 1;
+  22   1      }
+  23          
+  24          //void Timer1_Init(unsigned char *p_high,unsigned char *p_low)    //³õÊ¼»¯¶¨Ê±Æ÷1
+  25          //{
+  26          //  TMOD &= 0x0F; // ±£³Ö¶¨Ê±Æ÷0²»±äµÄÇ°ÌáÏÂÇå¿Õ¶¨Ê±Æ÷1µÄÉèÖÃ
+  27          //  TMOD |= 0x10; // ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½Îª0001xxxx£¬¼´¶¨Ê±Æ÷1µÄÄ£Ê½1
+  28          //  TH1 = *p_high;    // ¶¨Ê±Æ÷¸ßÎ»ÉèÖÃ 
+  29          //  TL1 = *p_low;   // ¶¨Ê±Æ÷µÍÎ»ÉèÖÃ
+  30          //  TR1 = 1;    
+  31          //  ET1 = 1;
+  32          //  EA = 1;
+  33          //}
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     19    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

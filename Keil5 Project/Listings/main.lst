@@ -1,0 +1,81 @@
+C51 COMPILER V9.54   MAIN                                                                  11/15/2022 16:56:58 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: E:\Embedded System\51\Keil5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRIN
+                    -T(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include <oled.h>
+   3          #include <Timer.h>
+   4          #include <UI.h>
+   5          #include <EEPROM.h>
+   6          
+   7          unsigned char high,low,i;
+   8          //unsigned char *p_high=&high,*p_low=&low;
+   9          unsigned int count=0;
+  10          unsigned int ten_min=0,hour=0,len_min,len_hour;
+  11          
+  12          void PlayTime_Init() //开始计时并显示
+  13          {
+  14   1      //  Timer_Tran(36000,p_high,p_low);  //36ms的定时器
+  15   1        Timer0_Init(); //初始化
+  16   1        for (i=0;i<4;i++){
+  17   2          OLED_ShowCHinese(32+(i<<4),2,13+i); //<<4 = *16
+  18   2        }
+  19   1        OLED_ShowChar(96,2,':',16);
+  20   1        for(;;){
+  21   2          if(ten_min==10){
+  22   3            hour++;
+  23   3            ten_min = 0;
+  24   3          }
+  25   2          OLED_ShowNum(48,4,hour,1,16);
+  26   2          OLED_ShowChar(56,4,'.',16);
+  27   2          OLED_ShowNum(63,4,ten_min,1,16);
+  28   2          OLED_ShowChar(72,4,'h',16);
+  29   2          //OLED_ShowNum(1,0,IAP_ReadByte(0x2000),1,16);
+  30   2        }
+  31   1      }
+  32          
+  33          void main()
+  34          {
+  35   1        OLED_Init();
+  36   1        OLED_Clear();
+  37   1        UI_Start();
+  38   1        //IAP_ProgramByte(0x2000,5);
+  39   1        for(;;){
+  40   2          PlayTime_Init();
+  41   2          
+  42   2        }
+  43   1      }
+  44          
+  45          void Timer0_PlayTime_Plus() interrupt 1 using 1 //定时器0负责计算练琴时间
+  46          {
+  47   1        TH0 = 0x73;
+  48   1        TL0 = 0x60;
+  49   1        count++;
+  50   1        if (count >= 10000){ //中断次数判断，36ms*10000为360s，即0.1h
+  51   2          ten_min++;
+  52   2          count = 0;
+  53   2        }
+  54   1      }
+C51 COMPILER V9.54   MAIN                                                                  11/15/2022 16:56:58 PAGE 2   
+
+*** WARNING C316 IN LINE 54 OF main.c: unterminated conditionals
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    186    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     13    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
