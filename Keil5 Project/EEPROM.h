@@ -22,3 +22,5 @@ void IAP_TrigUnit();
 unsigned char IAP_ReadByte(unsigned int addr);
 void IAP_ProgramByte(unsigned int addr,unsigned char dat);
 void IAP_EraseSector(unsigned int addr);
+
+#endif

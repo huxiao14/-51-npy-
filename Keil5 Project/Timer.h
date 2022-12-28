@@ -5,3 +5,6 @@
 //void Timer_Tran(unsigned int time_us,unsigned char *p_high,unsigned char *p_low);
 void Timer0_Init();
 //void Timer1_Init(unsigned char *p_high,unsigned char *p_low);
+void Timer0_Stop();
+
+#endif

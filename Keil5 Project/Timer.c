@@ -21,6 +21,13 @@ void Timer0_Init()		//初始化定时器0
 	EA = 1;
 }
 
+void Timer0_Stop()
+{
+	TR0 = 0;
+	ET0 = 0;
+	EA = 0;
+}
+
 //void Timer1_Init(unsigned char *p_high,unsigned char *p_low)		//初始化定时器1
 //{
 //	TMOD &= 0x0F; // 保持定时器0不变的前提下清空定时器1的设置

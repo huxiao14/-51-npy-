@@ -41,17 +41,17 @@
 //[5]0 1 2 3 ... 127	
 //[6]0 1 2 3 ... 127	
 //[7]0 1 2 3 ... 127 			   
-void delay_ms(unsigned int ms)
-{                         
-	unsigned int a;
-	while(ms)
-	{
-		a=1800;
-		while(a--);
-		ms--;
-	}
-	return;
-}
+//void delay_ms(unsigned int ms)
+//{                         
+//	unsigned int a;
+//	while(ms)
+//	{
+//		a=1800;
+//		while(a--);
+//		ms--;
+//	}
+//	return;
+//}
 /**********************************************
 //IIC Start
 **********************************************/
@@ -170,20 +170,20 @@ void OLED_WR_Byte(unsigned dat,unsigned cmd)
 /********************************************
 // fill_Picture
 ********************************************/
-void fill_picture(unsigned char fill_Data)
-{
-	unsigned char m,n;
-	for(m=0;m<8;m++)
-	{
-		OLED_WR_Byte(0xb0+m,0);		//page0-page1
-		OLED_WR_Byte(0x00,0);		//low column start address
-		OLED_WR_Byte(0x10,0);		//high column start address
-		for(n=0;n<128;n++)
-			{
-				OLED_WR_Byte(fill_Data,1);
-			}
-	}
-}
+//void fill_picture(unsigned char fill_Data)
+//{
+//	unsigned char m,n;
+//	for(m=0;m<8;m++)
+//	{
+//		OLED_WR_Byte(0xb0+m,0);		//page0-page1
+//		OLED_WR_Byte(0x00,0);		//low column start address
+//		OLED_WR_Byte(0x10,0);		//high column start address
+//		for(n=0;n<128;n++)
+//			{
+//				OLED_WR_Byte(fill_Data,1);
+//			}
+//	}
+//}
 
 
 /***********************Delay****************************************/
@@ -211,19 +211,19 @@ void Delay_1ms(unsigned int Del_1ms)
 	OLED_WR_Byte((x&0x0f),OLED_CMD); 
 }   	  
 //开启OLED显示    
-void OLED_Display_On(void)
-{
-	OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
-	OLED_WR_Byte(0X14,OLED_CMD);  //DCDC ON
-	OLED_WR_Byte(0XAF,OLED_CMD);  //DISPLAY ON
-}
+//void OLED_Display_On(void)
+//{
+//	OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
+//	OLED_WR_Byte(0X14,OLED_CMD);  //DCDC ON
+//	OLED_WR_Byte(0XAF,OLED_CMD);  //DISPLAY ON
+//}
 //关闭OLED显示     
-void OLED_Display_Off(void)
-{
-	OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
-	OLED_WR_Byte(0X10,OLED_CMD);  //DCDC OFF
-	OLED_WR_Byte(0XAE,OLED_CMD);  //DISPLAY OFF
-}		   			 
+//void OLED_Display_Off(void)
+//{
+//	OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
+//	OLED_WR_Byte(0X10,OLED_CMD);  //DCDC OFF
+//	OLED_WR_Byte(0XAE,OLED_CMD);  //DISPLAY OFF
+//}		   			 
 //清屏函数,清完屏,整个屏幕是黑色的!和没点亮一样!!!	  
 void OLED_Clear(void)  
 {  
@@ -236,17 +236,17 @@ void OLED_Clear(void)
 		for(n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA); 
 	} //更新显示
 }
-void OLED_On(void)  
-{  
-	u8 i,n;		    
-	for(i=0;i<8;i++)  
-	{  
-		OLED_WR_Byte (0xb0+i,OLED_CMD);    //设置页地址（0~7）
-		OLED_WR_Byte (0x00,OLED_CMD);      //设置显示位置—列低地址
-		OLED_WR_Byte (0x10,OLED_CMD);      //设置显示位置—列高地址   
-		for(n=0;n<128;n++)OLED_WR_Byte(1,OLED_DATA); 
-	} //更新显示
-}
+//void OLED_On(void)  
+//{  
+//	u8 i,n;		    
+//	for(i=0;i<8;i++)  
+//	{  
+//		OLED_WR_Byte (0xb0+i,OLED_CMD);    //设置页地址（0~7）
+//		OLED_WR_Byte (0x00,OLED_CMD);      //设置显示位置—列低地址
+//		OLED_WR_Byte (0x10,OLED_CMD);      //设置显示位置—列高地址   
+//		for(n=0;n<128;n++)OLED_WR_Byte(1,OLED_DATA); 
+//	} //更新显示
+//}
 //在指定位置显示一个字符,包括部分字符
 //x:0~127
 //y:0~63
