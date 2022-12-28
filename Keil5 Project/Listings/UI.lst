@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   UI                                                                    11/15/2022 16:56:58 PAGE 1   
+C51 COMPILER V9.54   UI                                                                    12/15/2022 00:17:21 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE UI
@@ -10,39 +10,100 @@ line level    source
 
    1          #include <reg51.h>
    2          #include <oled.h>
-   3          
-   4          unsigned char UI_i;
+   3          //#include <bmp.h>
+   4          #include <EEPROM.h>
    5          
-   6          void UI_Start() //欢迎界面
-   7          {
-   8   1        for(UI_i=0;UI_i<=4;UI_i++){
-   9   2          OLED_ShowCHinese(24+(UI_i<<4),1,UI_i);
-  10   2          OLED_ShowCHinese(16+(UI_i<<4),3,UI_i+5);
-  11   2        }
-  12   1        OLED_ShowCHinese(96,3,10);
-  13   1        for (;;){
-  14   2          if (P2 != 0xFF){   //判断任意键是否有被按下
-  15   3            OLED_Clear();
-  16   3            break;
-  17   3          }
-  18   2          OLED_ShowCHinese(56,5,11);
-  19   2          Delay_50ms(15);
-  20   2          if (P2 != 0xFF){
-  21   3            OLED_Clear();
-  22   3            break;
-  23   3          }
-  24   2          OLED_ShowCHinese(56,5,12);
-  25   2          Delay_50ms(15);
-  26   2        }
-  27   1      }
+   6          unsigned char UI_i;
+   7          extern unsigned char code GM[],HX[],ALS[],MK[],BH[],JZW[],SRV[];
+   8          
+   9          unsigned char Numlen(unsigned int num)
+  10          {
+  11   1        unsigned char len = 1;
+  12   1        while(num/=10)++len;
+  13   1        return len;
+  14   1      }
+  15          
+  16          void UI_Start() //欢迎界面
+  17          {
+  18   1        for(UI_i=0;UI_i<=4;UI_i++){
+  19   2          OLED_ShowCHinese(24+(UI_i<<4),2,UI_i);
+  20   2          OLED_ShowCHinese(16+(UI_i<<4),4,UI_i+5); //欢迎语
+  21   2        }
+  22   1        OLED_ShowCHinese(96,4,10);
+  23   1        for (;;){
+  24   2          if (P2 != 0xFF){   //判断任意键是否有被按下 p2 != 11111111
+  25   3            OLED_Clear();
+  26   3            break;
+  27   3          }
+  28   2          OLED_ShowCHinese(56,6,11); //箭头闪烁
+  29   2          Delay_50ms(10);
+  30   2          if (P2 != 0xFF){
+  31   3            OLED_Clear();
+  32   3            break;
+  33   3          }
+  34   2          OLED_ShowCHinese(56,6,12);
+  35   2          Delay_50ms(10);
+  36   2        }
+  37   1      }
+  38          
+  39          void UI_Stop(unsigned char op,unsigned int delta_score)  //停止练琴后显示的
+  40          {
+  41   1        OLED_Clear();
+  42   1        OLED_ShowCHinese(16,3,13);
+  43   1        OLED_ShowCHinese(32,3,21);
+  44   1        OLED_ShowCHinese(48,3,22);
+  45   1        OLED_ShowCHinese(64,3,19);
+  46   1        OLED_ShowCHinese(80,3,23);
+  47   1        OLED_ShowCHinese(96,3,24);
+  48   1        OLED_ShowChar(112,3,':',16);
+  49   1        OLED_ShowNum(48,5,delta_score,Numlen(delta_score),16);
+  50   1        switch (op){
+  51   2          case 0:
+  52   2            for (UI_i=0;UI_i<=4;UI_i++){
+  53   3              OLED_ShowCHinese(24+(UI_i<<4),1,15+UI_i);
+  54   3            }
+C51 COMPILER V9.54   UI                                                                    12/15/2022 00:17:21 PAGE 2   
+
+  55   2            break;
+  56   2          case 1:
+  57   2            OLED_ShowCHinese(32,1,25);
+  58   2            OLED_ShowCHinese(48,1,0);
+  59   2            OLED_ShowCHinese(64,1,26);
+  60   2            OLED_ShowCHinese(80,1,27);
+  61   2            OLED_ShowChar(96,1,'~',16);
+  62   2            break;
+  63   2          case 2:
+  64   2            OLED_ShowCHinese(48,1,28);
+  65   2            OLED_ShowCHinese(64,1,29);
+  66   2            OLED_ShowChar(80,1,'!',16);
+  67   2            break;
+  68   2          case 3:
+  69   2            OLED_ShowCHinese(40,1,30);
+  70   2            OLED_ShowCHinese(56,1,31);
+  71   2            OLED_ShowCHinese(72,1,19);
+  72   2            OLED_ShowChar(88,1,'~',16);
+  73   2            break;
+  74   2          case 4:
+  75   2            OLED_ShowCHinese(40,1,32);
+  76   2            OLED_ShowCHinese(56,1,33);
+  77   2            OLED_ShowCHinese(72,1,19);
+  78   2            OLED_ShowChar(88,1,'(',16);
+  79   2            break;
+  80   2        }
+  81   1      }
+  82          
+  83          //void UI_Shop()
+  84          //{
+  85          
+  86          //}
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    103    ----
+   CODE SIZE        =    429    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      1    ----
+   DATA SIZE        =      1       3
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

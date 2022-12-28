@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  11/15/2022 16:56:58 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  12/15/2022 00:17:21 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -14,68 +14,143 @@ line level    source
    4          #include <UI.h>
    5          #include <EEPROM.h>
    6          
-   7          unsigned char high,low,i;
-   8          //unsigned char *p_high=&high,*p_low=&low;
-   9          unsigned int count=0;
-  10          unsigned int ten_min=0,hour=0,len_min,len_hour;
+   7          extern unsigned char code GM[],HX[],ALS[],MK[],BH[],JZW[],SRV[];
+   8          unsigned char i,tmp,k=0;
+   9          unsigned int count=0,ten_min=0,hour=0;
+  10          unsigned char score[7] = {0};
   11          
-  12          void PlayTime_Init() //开始计时并显示
-  13          {
-  14   1      //  Timer_Tran(36000,p_high,p_low);  //36ms的定时器
-  15   1        Timer0_Init(); //初始化
-  16   1        for (i=0;i<4;i++){
-  17   2          OLED_ShowCHinese(32+(i<<4),2,13+i); //<<4 = *16
-  18   2        }
-  19   1        OLED_ShowChar(96,2,':',16);
-  20   1        for(;;){
-  21   2          if(ten_min==10){
-  22   3            hour++;
-  23   3            ten_min = 0;
-  24   3          }
-  25   2          OLED_ShowNum(48,4,hour,1,16);
-  26   2          OLED_ShowChar(56,4,'.',16);
-  27   2          OLED_ShowNum(63,4,ten_min,1,16);
-  28   2          OLED_ShowChar(72,4,'h',16);
-  29   2          //OLED_ShowNum(1,0,IAP_ReadByte(0x2000),1,16);
-  30   2        }
-  31   1      }
-  32          
-  33          void main()
-  34          {
-  35   1        OLED_Init();
-  36   1        OLED_Clear();
-  37   1        UI_Start();
-  38   1        //IAP_ProgramByte(0x2000,5);
-  39   1        for(;;){
-  40   2          PlayTime_Init();
-  41   2          
-  42   2        }
-  43   1      }
-  44          
-  45          void Timer0_PlayTime_Plus() interrupt 1 using 1 //定时器0负责计算练琴时间
-  46          {
-  47   1        TH0 = 0x73;
-  48   1        TL0 = 0x60;
-  49   1        count++;
-  50   1        if (count >= 10000){ //中断次数判断，36ms*10000为360s，即0.1h
-  51   2          ten_min++;
-  52   2          count = 0;
-  53   2        }
-  54   1      }
-C51 COMPILER V9.54   MAIN                                                                  11/15/2022 16:56:58 PAGE 2   
+  12          void PlayTime_Stop();
+  13          void PlayTime_Init();
+  14          void Score_plus(unsigned char *p);
+  15          
+  16          void main()
+  17          {
+  18   1        for (i=0;i<=6;i++){
+  19   2          tmp = IAP_ReadByte(0x2800+i);
+  20   2          if (tmp!=0xFF){
+  21   3            score[i] = tmp;
+  22   3          }
+  23   2        }
+  24   1        OLED_Init();
+  25   1        OLED_Clear();
+  26   1        for (i=0;i<=6;i++){
+  27   2          if (score[i]!=0)k=1;
+  28   2          if(k)OLED_ShowChar(85+i*6,0,score[i]+'0',1);
+  29   2        }
+  30   1      //  OLED_DrawBMP(0,0,64,8,GM);
+  31   1        UI_Start();
+  32   1        for(;;){
+  33   2          if (P2==0xFD){  //right to PlayTime p2 = 11111101
+  34   3            PlayTime_Init();
+  35   3          }
+  36   2          
+  37   2          
+  38   2        }
+  39   1      }
+  40          
+  41          void Timer0_PlayTime_Plus() interrupt 1 using 1 //定时器0负责计算练琴时间
+  42          {
+  43   1        TH0 = 0x73;
+  44   1        TL0 = 0x60;
+  45   1        count++;
+  46   1        if (count >= 100){ //中断次数判断，36ms*10000为360s，即0.1h
+  47   2          ten_min++;
+  48   2          count = 0;
+  49   2        }
+  50   1      }
+  51          
+  52          void PlayTime_Init() //开始计时并显示
+  53          {
+  54   1        Timer0_Init(); //初始化
+C51 COMPILER V9.54   MAIN                                                                  12/15/2022 00:17:21 PAGE 2   
 
-*** WARNING C316 IN LINE 54 OF main.c: unterminated conditionals
+  55   1        for (i=0;i<4;i++){
+  56   2          if (i<=1){
+  57   3            OLED_ShowCHinese(32+(i<<4),2,13+i); //<<4 = *16
+  58   3          }
+  59   2          else{
+  60   3            OLED_ShowCHinese(32+(i<<4),2,i-2);
+  61   3          }
+  62   2        }
+  63   1        OLED_ShowChar(96,2,':',16);
+  64   1        OLED_ShowChar(56,4,'.',16);
+  65   1        OLED_ShowChar(72,4,'h',16);
+  66   1        for(;;){
+  67   2          if(ten_min==10){
+  68   3            hour++;
+  69   3            if (hour>=6)break;
+  70   3            ten_min = 0;
+  71   3          }
+  72   2          OLED_ShowNum(48,4,hour,1,16);
+  73   2          OLED_ShowNum(63,4,ten_min,1,16);
+  74   2          if (P2 == 0xFE){ //mid stop PlayTime p2 = 11111110
+  75   3            OLED_Clear();
+  76   3            break;
+  77   3          }
+  78   2          //OLED_ShowNum(1,0,IAP_ReadByte(0x2000),1,16);
+  79   2        }
+  80   1        PlayTime_Stop();
+  81   1      }
+  82          
+  83          void PlayTime_Stop() //停止并计算得分
+  84          {
+  85   1        unsigned char Stop_Op=0;
+  86   1        unsigned int delta_score = 0;
+  87   1        Timer0_Stop();
+  88   1        if (hour==0){
+  89   2          if (ten_min<=2){Stop_Op = 0;}
+  90   2          else{
+  91   3            Stop_Op = 1;
+  92   3            delta_score = ten_min*100;
+  93   3          }
+  94   2        }
+  95   1        if (hour>=1&&hour<3){
+  96   2          Stop_Op = 2;
+  97   2          delta_score = 1000+(hour-1)*2000+ten_min*200;
+  98   2        }
+  99   1        if (hour>=3&&hour<6){
+ 100   2          Stop_Op = 3;
+ 101   2          delta_score = 5000+(hour-3)*3000+ten_min*300;
+ 102   2        }
+ 103   1        if (hour>=6){
+ 104   2          Stop_Op = 4;
+ 105   2          delta_score = 3000;
+ 106   2        }
+ 107   1        ten_min = 0;
+ 108   1        hour = 0;
+ 109   1        score[4] += ((delta_score/100)%10);
+ 110   1        score[3] += (delta_score/1000);
+ 111   1        Score_plus(score);
+ 112   1        IAP_EraseSector(0x2800);
+ 113   1        for(i=0;i<=6;i++){
+ 114   2          IAP_ProgramByte(0x2800+i,score[i]);
+ 115   2        }
+ 116   1        UI_Stop(Stop_Op,delta_score);
+C51 COMPILER V9.54   MAIN                                                                  12/15/2022 00:17:21 PAGE 3   
+
+ 117   1      }
+ 118          
+ 119          void Score_plus(unsigned char *p)
+ 120          {
+ 121   1        unsigned char Score_i;
+ 122   1        for (Score_i=6;Score_i>=1;Score_i--){
+ 123   2          if (p[Score_i]>=10){
+ 124   3            p[Score_i] %= 10;
+ 125   3            p[Score_i-1]++;
+ 126   3          }
+ 127   2        }
+ 128   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    186    ----
+   CODE SIZE        =    678    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     13    ----
+   DATA SIZE        =     16       6
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
