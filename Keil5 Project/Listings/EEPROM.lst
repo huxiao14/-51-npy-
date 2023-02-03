@@ -1,10 +1,10 @@
-C51 COMPILER V9.54   EEPROM                                                                12/15/2022 00:17:21 PAGE 1   
+C51 COMPILER V9.54   EEPROM                                                                02/03/2023 23:29:02 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE EEPROM
 OBJECT MODULE PLACED IN .\Objects\EEPROM.obj
-COMPILER INVOKED BY: E:\Embedded System\51\Keil5\C51\BIN\C51.EXE EEPROM.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PR
-                    -INT(.\Listings\EEPROM.lst) TABS(2) OBJECT(.\Objects\EEPROM.obj)
+COMPILER INVOKED BY: E:\Embedded System\51\Keil5\C51\BIN\C51.EXE EEPROM.c OPTIMIZE(9,SIZE) BROWSE DEBUG OBJECTEXTEND PRI
+                    -NT(.\Listings\EEPROM.lst) TABS(2) OBJECT(.\Objects\EEPROM.obj)
 
 line level    source
 
@@ -18,11 +18,11 @@ line level    source
    8          2:2200-23FF
    9          3:2400-25FF
   10          4:2600-27FF
-  11          5:2800-29FF
+  11          5:2800-29FF   用于积分
   12          6:2A00-2BFF
-  13          7:2C00-2DFF
-  14          8:2E00-2FFF
-  15          9:3000-31FF
+  13          7:2C00-2DFF   用于狗狗饿
+  14          8:2E00-2FFF   用于狗狗love
+  15          9:3000-31FF     Speical Gift
   16          10:3200-33FF
   17          
   18          */
@@ -62,7 +62,7 @@ line level    source
   52   1        //EA = 0;
   53   1        IAP_CONTR = ENABLE_IAP;
   54   1        IAP_CMD = CMD_PROGRAM;
-C51 COMPILER V9.54   EEPROM                                                                12/15/2022 00:17:21 PAGE 2   
+C51 COMPILER V9.54   EEPROM                                                                02/03/2023 23:29:02 PAGE 2   
 
   55   1        IAP_ADDRL = addr;
   56   1        IAP_ADDRH = addr >> 8;

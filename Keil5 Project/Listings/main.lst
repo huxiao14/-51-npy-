@@ -1,62 +1,176 @@
-C51 COMPILER V9.54   MAIN                                                                  11/12/2022 15:14:23 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  02/03/2023 23:29:02 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
 OBJECT MODULE PLACED IN .\Objects\main.obj
-COMPILER INVOKED BY: E:\Embedded System\51\Keil5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRIN
-                    -T(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+COMPILER INVOKED BY: E:\Embedded System\51\Keil5\C51\BIN\C51.EXE main.c OPTIMIZE(9,SIZE) BROWSE DEBUG OBJECTEXTEND PRINT
+                    -(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
 
 line level    source
 
    1          #include <reg51.h>
    2          #include <oled.h>
-   3          
-   4          unsigned int count=0;
-   5          
-   6          void Timer0_Init(void)    //360??@11.0592MHz
-   7          {
-   8   1        TMOD = 0x01; // 00010000
-   9   1        TL0 = 0x66;   //??????
-  10   1        TH0 = 0xFC;   //??????
-  11   1        //TF1 = 0;    //??TF1??
-  12   1        TR0 = 1;    //???1????
-  13   1        ET0 = 1;
-  14   1        EA = 1;
-  15   1        //PT0 = 0;
-  16   1      }
-  17          
-  18          void main()
-  19          {
-  20   1        unsigned char k=0;
-  21   1      //  P3 &= 0xFE;
-  22   1        OLED_Init();
-  23   1        Timer0_Init();
-  24   1        for(;;){
-  25   2          OLED_ShowChar(0,k,'A',0);
-  26   2          k++;
-  27   2          k %= 7;
-  28   2          //OLED_Clear();
-  29   2        }
-  30   1      }
-  31          
-  32          void Timer1_ShowChar() interrupt 1 using 1
-  33          {
-  34   1        TL0 = 0x66;   //??????
-  35   1        TH0 = 0xFC;
-  36   1        count++;
-  37   1        if (count >= 5000){
-  38   2          P3 &= 0xFE;
-  39   2          count = 0;
-  40   2        }
-  41   1      }
+   3          #include <Timer.h>
+   4          #include <UI.h>
+   5          #include <EEPROM.h>
+   6          
+   7          /*when use ShowChar(),h must -45,~ must - 66*/
+   8          
+   9          unsigned char i,tmp,dog_hungry=0,ten_min=0,hour=0;
+  10          unsigned int count=0;
+  11          unsigned char score[7] = {0};
+  12          
+  13          void PlayTime_Stop();
+  14          void PlayTime_Init();
+  15          void Score_plus(unsigned char *p);
+  16          
+  17          void main()
+  18          {
+  19   1        for (i=0;i<=6;i++){
+  20   2          tmp = IAP_ReadByte(0x2800+i);
+  21   2          if (tmp!=0xFF){
+  22   3            score[i] = tmp;
+  23   3          }
+  24   2        }
+  25   1        tmp = IAP_ReadByte(0x2C00);
+  26   1        if (tmp!=0xFF)dog_hungry = tmp;
+  27   1        OLED_Init();
+  28   1        OLED_Clear();
+  29   1        Score_show(score);
+  30   1      //  OLED_DrawBMP(0,0,50,5,OD);
+  31   1      //  Delay_50ms(100);
+  32   1        UI_Start();
+  33   1        //OLED_Clear();
+  34   1        for(;;){
+  35   2          if (P2==0xFD){  //right to PlayTime p2 = 11111101
+  36   3            PlayTime_Init();
+  37   3            //break;
+  38   3          }
+  39   2          if (P2==0xFB){ //lift to Dog p2 = 11111011;
+  40   3            Score_show(score);
+  41   3            UI_Dog();
+  42   3            for (i=0;i<=6;i++){
+  43   4              tmp = IAP_ReadByte(0x2800+i);
+  44   4              if (tmp!=0xFF){
+  45   5                score[i] = tmp;
+  46   5              }
+  47   4            }
+  48   3            //break;
+  49   3          }
+  50   2          
+  51   2        }
+  52   1      }
+  53          
+  54          void Timer0_PlayTime_Plus() interrupt 1 using 1 //定时器0负责计算练琴时间
+C51 COMPILER V9.54   MAIN                                                                  02/03/2023 23:29:02 PAGE 2   
+
+  55          {
+  56   1        TH0 = 0x73;
+  57   1        TL0 = 0x60;
+  58   1        count++;
+  59   1        if (count >= 10){ //中断次数判断，36ms*10000为360s，即0.1h
+  60   2          ten_min++;
+  61   2          count = 0;
+  62   2        }
+  63   1      }
+  64          
+  65          void PlayTime_Init() //开始计时并显示
+  66          {
+  67   1        Timer0_Init(); //初始化
+  68   1        for (i=0;i<4;i++){
+  69   2          if (i<=1){
+  70   3            OLED_ShowCHinese(32+(i<<4),2,13+i); //<<4 = *16
+  71   3          }
+  72   2          else{
+  73   3            OLED_ShowCHinese(32+(i<<4),2,i-2);
+  74   3          }
+  75   2        }
+  76   1        OLED_ShowChar(96,2,':',16);
+  77   1        OLED_ShowChar(56,4,'.',16);
+  78   1        OLED_ShowChar(72,4,'h'-45,16);
+  79   1        for(;;){
+  80   2          if (ten_min==5)dog_hungry+=3;
+  81   2          if(ten_min==10){
+  82   3            hour++;
+  83   3            dog_hungry += 2;
+  84   3            if (hour>=6)break;
+  85   3            ten_min = 0;
+  86   3          }
+  87   2          OLED_ShowChar(48,4,hour+'0',16);
+  88   2          OLED_ShowChar(63,4,ten_min+'0',16);
+  89   2          if (P2 == 0xFE){ //mid stop PlayTime p2 = 11111110
+  90   3            OLED_Clear();
+  91   3            break;
+  92   3          }
+  93   2          //OLED_ShowNum(1,0,IAP_ReadByte(0x2000),1,16);
+  94   2        }
+  95   1        PlayTime_Stop();
+  96   1      }
+  97          
+  98          void PlayTime_Stop() //停止并计算得分
+  99          {
+ 100   1        unsigned char Stop_Op=0;
+ 101   1        unsigned int delta_score = 0;
+ 102   1        Timer0_Stop();
+ 103   1        if (hour==0){
+ 104   2          if (ten_min<=2){Stop_Op = 0;}
+ 105   2          else{
+ 106   3            Stop_Op = 1;
+ 107   3            delta_score = ten_min*100;
+ 108   3          }
+ 109   2        }
+ 110   1        if (hour>=1&&hour<3){
+ 111   2          Stop_Op = 2;
+ 112   2          delta_score = 1000+(hour-1)*2000+ten_min*200;
+ 113   2        }
+ 114   1        if (hour>=3&&hour<6){
+ 115   2          Stop_Op = 3;
+ 116   2          delta_score = 5000+(hour-3)*3000+ten_min*300;
+C51 COMPILER V9.54   MAIN                                                                  02/03/2023 23:29:02 PAGE 3   
+
+ 117   2        }
+ 118   1        if (hour>=6){
+ 119   2          Stop_Op = 4;
+ 120   2          delta_score = 3000;
+ 121   2        }
+ 122   1        ten_min = 0;
+ 123   1        hour = 0;
+ 124   1        score[4] += ((delta_score/100)%10);
+ 125   1        score[3] += (delta_score/1000);
+ 126   1      //  Score_plus(score);
+ 127   1        for (i=6;i>=1;i--){
+ 128   2          if (score[i]>=10){
+ 129   3            score[i] %= 10;
+ 130   3            score[i-1]++;
+ 131   3          }
+ 132   2        }
+ 133   1        IAP_EraseSector(0x2800);
+ 134   1        for(i=0;i<=6;i++){
+ 135   2          IAP_ProgramByte(0x2800+i,score[i]);
+ 136   2        }
+ 137   1        IAP_EraseSector(0x2C00);
+ 138   1        IAP_ProgramByte(0x2C00,dog_hungry);
+ 139   1        UI_Stop(Stop_Op,delta_score);
+ 140   1      }
+ 141          
+ 142          //void Score_plus(unsigned char *p)
+ 143          //{
+ 144          //  unsigned char Score_i;
+ 145          //  for (Score_i=6;Score_i>=1;Score_i--){
+ 146          //    if (p[Score_i]>=10){
+ 147          //      p[Score_i] %= 10;
+ 148          //      p[Score_i-1]++;
+ 149          //    }
+ 150          //  }
+ 151          //}
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     90    ----
+   CODE SIZE        =    618    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      2       1
+   DATA SIZE        =     14       3
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
